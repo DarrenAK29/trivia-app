@@ -1,0 +1,182 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+
+public class Main {
+
+    public static int getSelectedButtonIndex(ButtonGroup buttonGroup) {
+        int index = 0;
+        for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+            AbstractButton button = buttons.nextElement();
+            if (button.isSelected()) {
+                return index;
+            }
+            index++;
+        }
+        return -1;
+    }
+
+    private static int[] createEmptyChoices(int questionCount) {
+        int[] choices = new int[questionCount];
+        Arrays.fill(choices, -1);
+        return choices;
+    }
+
+    private static void updateNavigationButtons(
+            QuizSession qs,
+            JButton backButton,
+            JButton forwardButton,
+            JButton submitButton) {
+
+        int index = qs.getCurIndex();
+        int lastIndex = qs.getQuiz().getQuestionCount() - 1;
+
+        backButton.setVisible(index > 0);
+        forwardButton.setVisible(index < lastIndex);
+        submitButton.setVisible(index == lastIndex);
+    }
+
+
+    public static void main(String[] args) {
+        String[] questionsList = {"How hard is Scarbo?", "Who wrote Scarbo?", "How long is Scarbo in minutes?", "Can Muyuan play Scarbo?"};
+        ArrayList<String> q1Choices = new ArrayList<>(Arrays.asList("Piss easy", "Hard as fuck", "Moderately difficult"));
+        ArrayList<String> q2Choices = new ArrayList<>(Arrays.asList("Ravel", "Beethoven", "Bach"));
+        ArrayList<String> q3Choices = new ArrayList<>(Arrays.asList("7", "8", "9"));
+        ArrayList<String> q4Choices = new ArrayList<>(Arrays.asList("Yes", "No"));
+
+        ArrayList<ArrayList<String>> mockChoices = new ArrayList<>(Arrays.asList(q1Choices, q2Choices, q3Choices, q4Choices));
+        int[] corrects = {1, 0, 2, 0};
+
+        ArrayList<Question> mockQuestions = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            mockQuestions.add(new Question(questionsList[i], mockChoices.get(i), corrects[i]));
+        }
+
+        Quiz quiz = new Quiz("Hard", mockQuestions, "Scarbo", "MCQ");
+
+
+
+        SwingUtilities.invokeLater(() -> {
+            int[] mock = createEmptyChoices(quiz.getQuestionCount());
+            mock[3] = 0;
+            mock[2] = 2;
+            mock[1] = 0;
+            mock[0] = 1;
+
+            QuizSession qs = new QuizSession(quiz, mock, 2);
+
+
+            // Create the main window
+            JFrame frame = new JFrame("Quiz!");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(300, 150);
+            frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
+
+            JPanel quizPanel = new JPanel();
+            quizPanel.setLayout(new BoxLayout(quizPanel, BoxLayout.Y_AXIS));
+
+            ArrayList<JPanel> questionPanels = new ArrayList<>();
+            ArrayList<ButtonGroup> buttonGroups = new ArrayList<>();
+
+            int startingIndex = qs.getCurIndex();
+
+            for (int i = 0; i < quiz.getQuestionCount(); i++) {
+                Question question = quiz.getQuestion(i);
+                JPanel questionPanel = new JPanel();
+                questionPanel.setLayout(new BoxLayout(questionPanel, BoxLayout.Y_AXIS));
+                JLabel label = new JLabel(question.getQuestionContent());
+                questionPanel.add(label);
+                ButtonGroup options = new ButtonGroup();
+                ArrayList<String> choices = question.getChoices();
+                for (int j = 0; j < question.getChoiceCount(); j++) {
+                    JRadioButton option = new JRadioButton(choices.get(j));
+                    if (j == qs.getSelectedChoice(i)) {
+                        option.setSelected(true);
+                    }
+                    options.add(option);
+                    questionPanel.add(option);
+                }
+                buttonGroups.add(options);
+                questionPanel.setVisible(false);
+                questionPanels.add(questionPanel);
+            }
+
+            JButton forwardButton = new JButton("Next");
+            JButton backButton = new JButton("Previous");
+            JButton submitButton = new JButton("Submit");
+
+            questionPanels.get(startingIndex).setVisible(true);
+            int questionCount = qs.getQuiz().getQuestionCount();
+
+            forwardButton.setVisible(true);
+            backButton.setVisible(true);
+            submitButton.setVisible(true);
+
+            updateNavigationButtons(qs, backButton, forwardButton, submitButton);
+
+            forwardButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    int curInd = qs.getCurIndex();
+                    int prevInd = curInd;
+                    questionPanels.get(prevInd).setVisible(false);
+                    qs.editSelectedChoices(prevInd, getSelectedButtonIndex(buttonGroups.get(prevInd)));
+                    qs.nextQuestion();
+                    int newInd = qs.getCurIndex();
+                    questionPanels.get(newInd).setVisible(true);
+                    updateNavigationButtons(qs, backButton, forwardButton, submitButton);
+                }
+            });
+
+
+            backButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    int curInd = qs.getCurIndex();
+                    questionPanels.get(curInd).setVisible(false);
+                    qs.editSelectedChoices(curInd, getSelectedButtonIndex(buttonGroups.get(curInd)));
+                    qs.prevQuestion();
+                    int newInd = qs.getCurIndex();
+                    questionPanels.get(newInd).setVisible(true);
+                    updateNavigationButtons(qs, backButton, forwardButton, submitButton);
+                }
+            });
+
+            submitButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    int curInd = qs.getCurIndex();
+                    qs.editSelectedChoices(curInd, getSelectedButtonIndex(buttonGroups.get(curInd)));
+                    int unansweredQuestions = 0;
+                    for (int i = 0; i < questionCount; i++) {
+                        if (qs.getSelectedChoice(i) == -1) {
+                            unansweredQuestions++;
+                        }
+                    }
+                    if (unansweredQuestions == 0) {
+                        QuizResult results = qs.submissionResult();
+                        System.out.println(QuizResultFormatter.format(results));
+                    } else {
+                        System.out.println("You have " + unansweredQuestions +" unanswered questions left!");
+                    }
+
+                }
+            });
+
+            for (JPanel panel: questionPanels) {
+                quizPanel.add(panel);
+            }
+
+            JPanel navigationButtons = new JPanel();
+            navigationButtons.setLayout(new FlowLayout());
+            navigationButtons.add(backButton);
+            navigationButtons.add(forwardButton);
+            navigationButtons.add(submitButton);
+            quizPanel.add(navigationButtons);
+
+            frame.add(quizPanel);
+            quizPanel.setVisible(true);
+
+            // Display the window
+            frame.setVisible(true);
+        });
+    }
+}
