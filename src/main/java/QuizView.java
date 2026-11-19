@@ -1,3 +1,5 @@
+import use_case.quiz.QuizSessionDataAccessInterface;
+
 import entity.Question;
 import entity.Quiz;
 import entity.QuizSession;
@@ -13,6 +15,7 @@ import java.util.Enumeration;
 public class QuizView {
     private JFrame frame;
     private JPanel home;
+    private final QuizSessionDataAccessInterface sessions;
 
     public static int getSelectedButtonIndex(ButtonGroup buttonGroup) {
         int index = 0;
@@ -40,7 +43,7 @@ public class QuizView {
         submitButton.setVisible(index == lastIndex);
     }
 
-    private static void saveCurrentAnswer(
+    private void saveCurrentAnswer(
             QuizSession qs,
             ArrayList<ButtonGroup> buttonGroups) {
 
@@ -49,6 +52,7 @@ public class QuizView {
                 index,
                 getSelectedButtonIndex(buttonGroups.get(index))
         );
+        sessions.saveSession(qs);
     }
 
     private JPanel createQuizPanel(QuizSession qs) {
@@ -167,9 +171,10 @@ public class QuizView {
         return quizPanel;
     }
 
-    public QuizView() {
+    public QuizView(QuizSessionDataAccessInterface sessions) {
+        this.sessions = sessions;
         SwingUtilities.invokeLater(() -> {
-            QuizSession qs = SampleQuizData.createSession();
+            QuizSession qs = sessions.loadSession();
 
             frame = new JFrame("Home page");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
