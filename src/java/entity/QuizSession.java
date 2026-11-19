@@ -1,6 +1,8 @@
+package entity;
+
 import java.util.Arrays;
 
-class QuizSession {
+public class QuizSession {
     private Quiz quiz;
     private int curIndex;
     private int[] selectedChoices;

@@ -1,3 +1,5 @@
+import entity.QuizResult;
+
 import java.util.ArrayList;
 
 class QuizResultFormatter {

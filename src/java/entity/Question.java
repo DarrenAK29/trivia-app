@@ -1,6 +1,8 @@
+package entity;
+
 import java.util.ArrayList;
 
-class Question {
+public class Question {
     final private String questionContent;
     final private ArrayList<String> choices;
     final private int correctChoice;

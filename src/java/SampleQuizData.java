@@ -1,3 +1,7 @@
+import entity.Question;
+import entity.Quiz;
+import entity.QuizSession;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 

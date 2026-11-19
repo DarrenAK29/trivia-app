@@ -1,6 +1,8 @@
+package entity;
+
 import java.util.ArrayList;
 
-class QuizResult {
+public class QuizResult {
     private int score;
     private int size;
     private ArrayList<String> correct = new ArrayList<>();

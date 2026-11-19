@@ -1,6 +1,8 @@
+package entity;
+
 import java.util.ArrayList;
 
-class Quiz {
+public class Quiz {
     final private String difficultyLevel;
     final private ArrayList<Question> questions;
     final private String category;

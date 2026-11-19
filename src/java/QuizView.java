@@ -1,3 +1,8 @@
+import entity.Question;
+import entity.Quiz;
+import entity.QuizSession;
+import entity.QuizResult;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
