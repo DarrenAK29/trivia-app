@@ -93,8 +93,9 @@ class QuizSession {
     private Quiz quiz;
     private int curIndex;
     private int[] selectedChoices;
+    private int id;
 
-    public QuizSession(Quiz quiz, int[] selectedChoices, int curIndex) {
+    public QuizSession(Quiz quiz, int[] selectedChoices, int curIndex, int id) {
         if (selectedChoices.length != quiz.getQuestionCount()) {
             throw new IllegalArgumentException(
                     "Answer count must match question count"
@@ -121,20 +122,17 @@ class QuizSession {
         this.quiz = quiz;
         this.selectedChoices = selectedChoices.clone();
         this.curIndex = curIndex;
-
-
+        this.id = id;
     }
 
-    public QuizSession(Quiz quiz) {
-        this(quiz, createEmptyChoices(quiz.getQuestionCount()), 0);
+    public QuizSession(Quiz quiz, int id) { this(quiz, createEmptyChoices(quiz.getQuestionCount()), 0, id); }
+
+    public QuizSession(Quiz quiz, int[] selectedChoices, int id) {
+        this(quiz, selectedChoices, 0, id);
     }
 
-    public QuizSession(Quiz quiz, int[] selectedChoices) {
-        this(quiz, selectedChoices, 0);
-    }
-
-    public QuizSession(Quiz quiz, int curIndex) {
-        this(quiz, createEmptyChoices(quiz.getQuestionCount()), curIndex);
+    public QuizSession(Quiz quiz, int curIndex, int id) {
+        this(quiz, createEmptyChoices(quiz.getQuestionCount()), curIndex, id);
     }
 
     public Quiz getQuiz() {
@@ -182,6 +180,11 @@ class QuizSession {
 
         selectedChoices[questionInd] = choice;
     }
+
+    @Override
+    public String toString() {
+        return "Selected choices are " + Arrays.toString(selectedChoices) + ". Currently on index " + curIndex;
+    }
 }
 
 class QuizResult {
@@ -190,10 +193,15 @@ class QuizResult {
     private ArrayList<String> correct = new ArrayList<>();
     private ArrayList<String> incorrect = new ArrayList<>();
     private ArrayList<String> unanswered = new ArrayList<>();
-
+    private ArrayList<String> actualChoices = new ArrayList<>();
+    private ArrayList<String> correctChoices = new ArrayList<>();
+    private ArrayList<Question> questions = new ArrayList<>();
     public QuizResult(ArrayList<Question> questions, int[] selectedChoices) {
+        size = questions.size();
+        this.questions = questions;
         for (int i = 0; i < questions.size(); i++) {
-            size++;
+            correctChoices.add(String.valueOf(selectedChoices[i]));
+            actualChoices.add(String.valueOf(questions.get(i).getCorrectChoice()));
             int choice = selectedChoices[i];
             if (choice == -1) {
                 unanswered.add(String.valueOf(i + 1));
@@ -225,6 +233,18 @@ class QuizResult {
     public ArrayList<String> getUnanswered() {
         return new ArrayList<>(this.unanswered);
     }
+
+    public ArrayList<String> getActualChoices() {
+        return new ArrayList<>(this.actualChoices);
+    }
+
+    public ArrayList<String> getCorrectChoices() {
+        return new ArrayList<>(this.correctChoices);
+    }
+
+    public ArrayList<Question> getQuestions() { return new ArrayList<>(this.questions); }
+
+
 
 
 }
