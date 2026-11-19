@@ -3,7 +3,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 
 public class QuizView {
@@ -20,12 +19,6 @@ public class QuizView {
             index++;
         }
         return -1;
-    }
-
-    private static int[] createEmptyChoices(int questionCount) {
-        int[] choices = new int[questionCount];
-        Arrays.fill(choices, -1);
-        return choices;
     }
 
     private static void updateNavigationButtons(
@@ -170,30 +163,8 @@ public class QuizView {
     }
 
     public QuizView() {
-        String[] questionsList = {"How hard is Scarbo?", "Who wrote Scarbo?", "How long is Scarbo in minutes?", "Can Muyuan play Scarbo?"};
-        ArrayList<String> q1Choices = new ArrayList<>(Arrays.asList("Piss easy", "Hard as fuck", "Moderately difficult"));
-        ArrayList<String> q2Choices = new ArrayList<>(Arrays.asList("Ravel", "Beethoven", "Bach"));
-        ArrayList<String> q3Choices = new ArrayList<>(Arrays.asList("7", "8", "9"));
-        ArrayList<String> q4Choices = new ArrayList<>(Arrays.asList("Yes", "No"));
-
-        ArrayList<ArrayList<String>> mockChoices = new ArrayList<>(Arrays.asList(q1Choices, q2Choices, q3Choices, q4Choices));
-        int[] corrects = {1, 0, 2, 0};
-
-        ArrayList<Question> mockQuestions = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            mockQuestions.add(new Question(questionsList[i], mockChoices.get(i), corrects[i]));
-        }
-
-        Quiz quiz = new Quiz("Hard", mockQuestions, "Scarbo", "MCQ");
-
         SwingUtilities.invokeLater(() -> {
-            int[] mock = createEmptyChoices(quiz.getQuestionCount());
-            mock[3] = 0;
-            mock[2] = 2;
-            mock[1] = 0;
-            mock[0] = 1;
-
-            QuizSession qs = new QuizSession(quiz, mock, 2, 0);
+            QuizSession qs = SampleQuizData.createSession();
 
             frame = new JFrame("Home page");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
