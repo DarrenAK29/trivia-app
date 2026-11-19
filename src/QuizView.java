@@ -220,8 +220,4 @@ public class QuizView {
             frame.setVisible(true);
         });
     }
-
-
-
-
 }
