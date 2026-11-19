@@ -131,7 +131,27 @@ public class QuizView {
                 }
                 if (unansweredQuestions == 0) {
                     QuizResult results = qs.submissionResult();
-                    System.out.println(QuizResultFormatter.format(results));
+                    ReviewResultsViewModel viewModel = new ReviewResultsViewModel();
+                    ReviewResultsPresenter presenter = new ReviewResultsPresenter(viewModel);
+                    ReviewResultsInteractor interactor = new ReviewResultsInteractor(presenter);
+                    ReviewResultsController controller = new ReviewResultsController(interactor);
+
+                    ReviewResultsView resultsView = new ReviewResultsView(viewModel, () -> {
+                        frame.getContentPane().removeAll();
+                        frame.add(home);
+                        home.setVisible(true);
+                        frame.setTitle("Home");
+                        frame.revalidate();
+                        frame.repaint();
+                    });
+
+                    controller.execute(results);
+
+                    frame.getContentPane().removeAll();
+                    frame.add(resultsView);
+                    frame.setTitle("Quiz Results");
+                    frame.revalidate();
+                    frame.repaint();
                 } else {
                     System.out.println("You have " + unansweredQuestions +" unanswered questions left!");
                 }
