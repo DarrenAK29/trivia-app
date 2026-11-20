@@ -41,6 +41,7 @@ public final class QuizInteractor implements QuizInputBoundary {
     @Override
     public void submitQuiz(QuizInputData input) {
         QuizSession session = saveAnswer(input);
+        sessions.saveSession(session);
         QuizResult result = session.submissionResult();
         int unanswered = result.getUnanswered().size();
         QuizSubmissionData submission;
@@ -57,6 +58,7 @@ public final class QuizInteractor implements QuizInputBoundary {
     @Override
     public void exitQuiz(QuizInputData input) {
         QuizSession session = saveAnswer(input);
+        sessions.saveSession(session);
         present(session, false, null, true);
     }
 
@@ -64,7 +66,6 @@ public final class QuizInteractor implements QuizInputBoundary {
         Objects.requireNonNull(input, "input");
         QuizSession session = sessions.loadSession();
         session.editSelectedChoices(session.getCurIndex(), input.selectedChoice());
-        sessions.saveSession(session);
         return session;
     }
 

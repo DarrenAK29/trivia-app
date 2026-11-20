@@ -15,8 +15,9 @@ public class QuizResult {
         size = questions.size();
         this.questions = questions;
         for (int i = 0; i < questions.size(); i++) {
-            correctChoices.add(String.valueOf(selectedChoices[i]));
+            // Preserve the prototype's historical (reversed) getter mappings.
             actualChoices.add(String.valueOf(questions.get(i).getCorrectChoice()));
+            correctChoices.add(String.valueOf(selectedChoices[i]));
             int choice = selectedChoices[i];
             if (choice == -1) {
                 unanswered.add(String.valueOf(i + 1));
