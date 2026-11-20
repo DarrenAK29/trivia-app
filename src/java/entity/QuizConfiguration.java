@@ -64,9 +64,9 @@ public class QuizConfiguration {
             QuestionType questionType,
             Encoding encoding) {
 
-        if (questionCount <= 0) {
+        if (questionCount < 1 || questionCount > 50) {
             throw new IllegalArgumentException(
-                    "Question count must be positive.");
+                    "Question count must be between 1 and 50.");
         }
 
         if (categoryId != null && categoryId <= 0) {
