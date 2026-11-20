@@ -1,0 +1,6 @@
+target/
+out/
+scores.txt
+.idea/
+*.iml
+.DS_Store

@@ -3,6 +3,7 @@ package use_case.quiz;
 import entity.Question;
 import entity.QuizResult;
 import entity.QuizSession;
+import entity.ScoreRecord;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -11,10 +12,13 @@ import java.util.Objects;
 public final class QuizInteractor implements QuizInputBoundary {
     private final QuizSessionDataAccessInterface sessions;
     private final QuizOutputBoundary presenter;
+    private final ScoreSaveDataAccessInterface scores;
 
-    public QuizInteractor(QuizSessionDataAccessInterface sessions, QuizOutputBoundary presenter) {
+    public QuizInteractor(QuizSessionDataAccessInterface sessions, QuizOutputBoundary presenter,
+                          ScoreSaveDataAccessInterface scores) {
         this.sessions = Objects.requireNonNull(sessions);
         this.presenter = Objects.requireNonNull(presenter);
+        this.scores = Objects.requireNonNull(scores);
     }
 
     @Override
@@ -51,6 +55,8 @@ public final class QuizInteractor implements QuizInputBoundary {
         } else {
             submission = new QuizSubmissionData(0, result.getScore(), result.getSize(),
                     result.getCorrect(), result.getIncorrect());
+            scores.saveScore(new ScoreRecord(session.getQuiz().getCategory(),
+                    session.getQuiz().getDifficultyLevel(), result.getScore(), result.getSize()));
         }
         present(session, true, submission, false);
     }
