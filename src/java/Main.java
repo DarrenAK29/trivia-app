@@ -1,5 +1,6 @@
 import data_access.InMemoryQuizSessionDataAccessObject;
 import data_access.SampleQuizData;
+<<<<<<< HEAD
 import interface_adapter.quiz.QuizController;
 import interface_adapter.quiz.QuizPresenter;
 import interface_adapter.quiz.QuizViewModel;
@@ -19,5 +20,11 @@ public final class Main {
         QuizInputBoundary interactor = new QuizInteractor(sessions, presenter);
         QuizController controller = new QuizController(interactor);
         new QuizView(controller, viewModel);
+=======
+
+public class Main {
+    public static void main(String[] args) {
+        new QuizView(new InMemoryQuizSessionDataAccessObject(SampleQuizData.createSession()));
+>>>>>>> c475963558e459cf19ef9d70a743e92ba2dabbe7
     }
 }
