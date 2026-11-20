@@ -1,3 +1,5 @@
+package data_access;
+
 import entity.Question;
 import entity.Quiz;
 import entity.QuizSession;
