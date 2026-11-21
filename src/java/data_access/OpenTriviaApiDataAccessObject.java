@@ -13,6 +13,9 @@ import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.Collections;
 import entity.Question;
+import java.io.StringReader;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.parser.ParserDelegator;
 
 public class OpenTriviaApiDataAccessObject
         implements QuestionDataAccessInterface {
@@ -95,20 +98,21 @@ public class OpenTriviaApiDataAccessObject
     }
 
     private String getQuestionText(JsonObject question) {
-        return question.get("question").getAsString();
+        return decodeHtml(question.get("question").getAsString());
     }
 
     private String getCorrectAnswer(JsonObject question) {
-        return question.get("correct_answer").getAsString();
+        return decodeHtml(question.get("correct_answer").getAsString());
     }
 
     private ArrayList<String> getIncorrectAnswers(JsonObject question) {
-        JsonArray incorrectAnswers = question.getAsJsonArray("incorrect_answers");
+        JsonArray incorrectAnswers =
+                question.getAsJsonArray("incorrect_answers");
 
         ArrayList<String> answers = new ArrayList<>();
 
         for (int i = 0; i < incorrectAnswers.size(); i++) {
-            answers.add(incorrectAnswers.get(i).getAsString());
+            answers.add(decodeHtml(incorrectAnswers.get(i).getAsString()));
         }
 
         return answers;
@@ -171,6 +175,27 @@ public class OpenTriviaApiDataAccessObject
             Thread.currentThread().interrupt();
             throw new RuntimeException("Question retrieval was interrupted.", e);
         }
+    }
+
+    private String decodeHtml(String text) {
+        StringBuilder decoded = new StringBuilder();
+
+        try {
+            new ParserDelegator().parse(
+                    new StringReader("<html><body>" + text + "</body></html>"),
+                    new HTMLEditorKit.ParserCallback() {
+                        @Override
+                        public void handleText(char[] data, int position) {
+                            decoded.append(data);
+                        }
+                    },
+                    true
+            );
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to decode API text.", e);
+        }
+
+        return decoded.toString();
     }
 
 }
