@@ -6,8 +6,10 @@ import interface_adapter.quiz.ConfigureQuizViewModel;
 import interface_adapter.quiz.ConfigureQuizViewState;
 import interface_adapter.quiz.QuizController;
 import interface_adapter.quiz.QuizViewModel;
+import use_case.quiz.QuizConfigFileDataAccessInterface;
 
 import java.awt.*;
+import java.util.Map;
 import java.util.Objects;
 import javax.swing.*;
 
@@ -20,6 +22,7 @@ public final class ConfigureQuizView {
     private final ConfigureQuizViewModel configureViewModel;
     private final QuizController quizController;
     private final QuizViewModel quizViewModel;
+    private final QuizConfiguration qc;
 
     private JFrame frame;
 
@@ -28,28 +31,38 @@ public final class ConfigureQuizView {
     private JComboBox<String> difficultyBox;
     private JComboBox<String> questionTypeBox;
     private JComboBox<String> encodingBox;
-    private JButton generateButton;
+    private JButton saveSettingsButton;
     private JLabel errorLabel;
 
     private boolean hasLaunchedQuiz;
+
+    private static void customizeButton(JButton button, Dimension dimensions, Font font) {
+        button.setPreferredSize(dimensions);
+        button.setMaximumSize(dimensions);
+        button.setMinimumSize(dimensions);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setFont(font);
+    }
 
     public ConfigureQuizView(
             ConfigureQuizController configureController,
             ConfigureQuizViewModel configureViewModel,
             QuizController quizController,
-            QuizViewModel quizViewModel) {
+            QuizViewModel quizViewModel,
+            QuizConfigFileDataAccessInterface qcfdai) {
 
         this.configureController = Objects.requireNonNull(configureController);
         this.configureViewModel = Objects.requireNonNull(configureViewModel);
         this.quizController = Objects.requireNonNull(quizController);
         this.quizViewModel = Objects.requireNonNull(quizViewModel);
+        this.qc = qcfdai.loadConfig();
 
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Configure Quiz");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(550, 500);
             frame.setMinimumSize(new Dimension(450, 450));
             frame.setLocationRelativeTo(null);
+            frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 
             buildView();
 
@@ -132,17 +145,16 @@ public final class ConfigureQuizView {
         mainPanel.add(formPanel);
         mainPanel.add(Box.createVerticalStrut(20));
 
-        generateButton = new JButton("Generate Quiz");
-        generateButton.setFont(new Font("Arial", Font.BOLD, 16));
-        generateButton.setBackground(new Color(45, 130, 215));
-        generateButton.setForeground(Color.WHITE);
-        generateButton.setFocusPainted(false);
-        generateButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        generateButton.setMaximumSize(new Dimension(200, 45));
+        saveSettingsButton = new JButton("Save Settings");
+//        saveSettingsButton.setForeground(Color.WHITE);
+//        saveSettingsButton.setFocusPainted(false);
+        saveSettingsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        customizeButton(saveSettingsButton, new Dimension(200, 45), new Font("Arial", Font.BOLD, 16));
+        saveSettingsButton.setBackground(new Color(45, 130, 215));
 
-        generateButton.addActionListener(event -> generateQuiz());
+        saveSettingsButton.addActionListener(event -> saveSettings());
 
-        mainPanel.add(generateButton);
+        mainPanel.add(saveSettingsButton);
         mainPanel.add(Box.createVerticalStrut(15));
 
         errorLabel = new JLabel(" ");
@@ -156,7 +168,7 @@ public final class ConfigureQuizView {
 
     private JSpinner createQuestionCountSpinner() {
         questionCountSpinner = new JSpinner(
-                new SpinnerNumberModel(10, 1, 50, 1)
+                new SpinnerNumberModel(qc.getQuestionCount(), 1, 50, 1)
         );
         return questionCountSpinner;
     }
@@ -191,6 +203,7 @@ public final class ConfigureQuizView {
         };
 
         categoryBox = new JComboBox<>(categories);
+        categoryBox.setSelectedIndex(qc.getCategoryId() == null ? 0 : qc.getCategoryId() - 8);
         return categoryBox;
     }
 
@@ -202,7 +215,15 @@ public final class ConfigureQuizView {
                 "Hard"
         };
 
+        Map<String, Integer> numAndDifficulty = Map.of(
+                "", 0,
+                "easy", 1,
+                "medium", 2,
+                "hard", 3
+        );
+
         difficultyBox = new JComboBox<>(difficulties);
+        difficultyBox.setSelectedIndex(numAndDifficulty.get(qc.getDifficulty().getApiValue()));
         return difficultyBox;
     }
 
@@ -213,7 +234,14 @@ public final class ConfigureQuizView {
                 "True / False"
         };
 
+        Map<String, Integer> numAndType = Map.of(
+                "", 0,
+                "multiple", 1,
+                "boolean", 2
+        );
+
         questionTypeBox = new JComboBox<>(types);
+        questionTypeBox.setSelectedIndex(numAndType.get(qc.getQuestionType().getApiValue()));
         return questionTypeBox;
     }
 
@@ -224,7 +252,14 @@ public final class ConfigureQuizView {
                 "Base64"
         };
 
+        Map<String, Integer> numAndEncoding = Map.of(
+                "default", 0,
+                "url3986", 1,
+                "base64", 2
+        );
+
         encodingBox = new JComboBox<>(encodings);
+        encodingBox.setSelectedIndex(numAndEncoding.get(qc.getEncoding().getApiValue()));
         return encodingBox;
     }
 
@@ -246,7 +281,7 @@ public final class ConfigureQuizView {
         panel.add(input, constraints);
     }
 
-    private void generateQuiz() {
+    private void saveSettings() {
         errorLabel.setText(" ");
 
         int questionCount = (Integer) questionCountSpinner.getValue();
@@ -281,10 +316,17 @@ public final class ConfigureQuizView {
                 encoding
         );
 
-        generateButton.setEnabled(false);
-        generateButton.setText("Generating...");
+//        System.out.println(config.getQuestionCount());
+//        System.out.println(config.getCategoryId());
+//        System.out.println(config.getDifficulty());
+//        System.out.println(config.getQuestionType());
+//        System.out.println(config.getEncoding());
+
+//        saveSettingsButton.setEnabled(false);
+//        saveSettingsButton.setText("Generating...");
 
         configureController.configureQuiz(config);
+        frame.setVisible(false);
     }
 
     private void render(ConfigureQuizViewState state) {
@@ -299,8 +341,8 @@ public final class ConfigureQuizView {
                 quizController.startQuiz();
             }
         } else {
-            generateButton.setEnabled(true);
-            generateButton.setText("Generate Quiz");
+            saveSettingsButton.setEnabled(true);
+            saveSettingsButton.setText("Save Settings");
 
             if (state.getError() != null) {
                 errorLabel.setText(state.getError());

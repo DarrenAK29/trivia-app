@@ -1,6 +1,8 @@
 package interface_adapter.quiz;
 
 import java.util.Objects;
+
+import entity.QuizConfiguration;
 import use_case.quiz.QuizInputBoundary;
 import use_case.quiz.QuizInputData;
 
@@ -12,6 +14,9 @@ public final class QuizController {
         this.interactor = Objects.requireNonNull(interactor);
     }
 
+    public void newQuiz(QuizConfiguration qc) {
+        interactor.startNewQuiz(qc);
+    }
     public void startQuiz() {
         interactor.startQuiz();
     }

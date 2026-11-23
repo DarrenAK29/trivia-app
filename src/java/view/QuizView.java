@@ -115,7 +115,8 @@ public final class QuizView {
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Home page");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(600, 450);
+            frame.setSize(1100, 500);
+            frame.setResizable(false);
             frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
             viewModel.addPropertyChangeListener(event -> render((QuizViewState) event.getNewValue()));
             render(viewModel.getState());
@@ -128,7 +129,7 @@ public final class QuizView {
         if (state.inQuiz()) {
             showQuiz(state);
         } else {
-            showHome();
+            frame.setVisible(false);
         }
         frame.revalidate();
         frame.repaint();
@@ -138,15 +139,6 @@ public final class QuizView {
         }
     }
 
-    private void showHome() {
-        // The prototype displays "Home page" initially and "Home" after exiting.
-        frame.setTitle(hasOpenedQuiz ? "Home" : "Home page");
-        JPanel home = new JPanel(new FlowLayout());
-        JButton startButton = new JButton("Start quiz");
-        startButton.addActionListener(event -> controller.startQuiz());
-        home.add(startButton);
-        frame.add(home);
-    }
 
     private static void changeButtonSize(JButton button, Dimension dimensions) {
         button.setPreferredSize(dimensions);
@@ -165,6 +157,7 @@ public final class QuizView {
         final int BUTTON_SPACING = 10;
 
         frame.setTitle("Quiz!");
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         JPanel quizPanel = new JPanel();
 
         quizPanel.setLayout(new BoxLayout(quizPanel, BoxLayout.Y_AXIS));
@@ -223,8 +216,6 @@ public final class QuizView {
                 choiceButtonPanel.add(Box.createVerticalStrut(BUTTON_SPACING));
             }
         }
-        choiceButtonPanel.add(Box.createVerticalStrut(2 * BUTTON_SPACING));
-
 
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBorder(
@@ -248,7 +239,6 @@ public final class QuizView {
                 new Dimension(Integer.MAX_VALUE, questionPanel.getPreferredSize().height)
         );
 
-        quizPanel.add(questionPanel);
 
         Dimension backSize = new Dimension(150, 38);
         Dimension forwardSize = new Dimension(80, 38);
@@ -302,9 +292,11 @@ public final class QuizView {
         questionPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         navigationButtonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lowerButtonPanel.setOpaque(false);
         lowerButtonPanel.add(navigationButtonPanel);
         lowerButtonPanel.add(Box.createVerticalStrut(2 * BUTTON_SPACING));
         lowerButtonPanel.add(exitButton);
+
 
         navigationButtonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         navigationButtonPanel.setMaximumSize(
@@ -313,13 +305,6 @@ public final class QuizView {
                         navigationButtonPanel.getPreferredSize().height
                 )
         );
-
-        lowerButtonPanel.add(navigationButtonPanel);
-        lowerButtonPanel.add(
-                Box.createVerticalStrut(2 * BUTTON_SPACING)
-        );
-        lowerButtonPanel.add(exitButton);
-
         lowerButtonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         lowerButtonPanel.setMaximumSize(
                 new Dimension(
@@ -328,7 +313,8 @@ public final class QuizView {
                 )
         );
 
-
+        quizPanel.add(questionPanel);
+        quizPanel.add(Box.createVerticalStrut(2 * BUTTON_SPACING));
         quizPanel.add(lowerButtonPanel);
 
         choiceButtonPanel.addComponentListener(new ComponentAdapter() {
@@ -352,8 +338,6 @@ public final class QuizView {
         });
 
         frame.add(quizPanel);
-
-
     }
 
     private static int selectedIndex(ButtonGroup options) {

@@ -50,6 +50,7 @@ public final class StatsView {
             frame.add(panel);
             frame.setSize(400, 450);
             frame.setVisible(true);
+            frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             controller.viewStats();
         });
     }
