@@ -22,9 +22,10 @@ public final class ConfigureQuizView {
     private final ConfigureQuizViewModel configureViewModel;
     private final QuizController quizController;
     private final QuizViewModel quizViewModel;
-    private final QuizConfiguration qc;
+    private QuizConfiguration qc;
+    private final QuizConfigFileDataAccessInterface qcfdai;
 
-    private JFrame frame;
+    JFrame frame;
 
     private JSpinner questionCountSpinner;
     private JComboBox<CategoryOption> categoryBox;
@@ -35,6 +36,12 @@ public final class ConfigureQuizView {
     private JLabel errorLabel;
 
     private boolean hasLaunchedQuiz;
+    private final Map<String, Integer> numAndEncoding = Map.of("default", 0, "url3986", 1, "base64", 2);
+
+    private final Map<String, Integer> numAndDifficulty = Map.of("", 0, "easy", 1, "medium", 2, "hard", 3);
+
+    private final Map<String, Integer> numAndType = Map.of("", 0, "multiple", 1, "boolean", 2);
+
 
     private static void customizeButton(JButton button, Dimension dimensions, Font font) {
         button.setPreferredSize(dimensions);
@@ -55,7 +62,10 @@ public final class ConfigureQuizView {
         this.configureViewModel = Objects.requireNonNull(configureViewModel);
         this.quizController = Objects.requireNonNull(quizController);
         this.quizViewModel = Objects.requireNonNull(quizViewModel);
+        this.qcfdai = qcfdai;
         this.qc = qcfdai.loadConfig();
+
+
 
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Configure Quiz");
@@ -74,8 +84,18 @@ public final class ConfigureQuizView {
 
             render(configureViewModel.getState());
 
-            frame.setVisible(true);
+//            frame.setVisible(true);
         });
+    }
+
+    public void loadView() {
+        this.qc = qcfdai.loadConfig();
+        questionCountSpinner.setValue(qc.getQuestionCount());
+        categoryBox.setSelectedIndex(qc.getCategoryId() == null ? 0 : qc.getCategoryId() - 8);
+        encodingBox.setSelectedIndex(numAndEncoding.get(qc.getEncoding().getApiValue()));
+        difficultyBox.setSelectedIndex(numAndDifficulty.get(qc.getDifficulty().getApiValue()));
+        questionTypeBox.setSelectedIndex(numAndType.get(qc.getQuestionType().getApiValue()));
+        frame.setVisible(true);
     }
 
     private void buildView() {
@@ -215,12 +235,7 @@ public final class ConfigureQuizView {
                 "Hard"
         };
 
-        Map<String, Integer> numAndDifficulty = Map.of(
-                "", 0,
-                "easy", 1,
-                "medium", 2,
-                "hard", 3
-        );
+
 
         difficultyBox = new JComboBox<>(difficulties);
         difficultyBox.setSelectedIndex(numAndDifficulty.get(qc.getDifficulty().getApiValue()));
@@ -234,11 +249,6 @@ public final class ConfigureQuizView {
                 "True / False"
         };
 
-        Map<String, Integer> numAndType = Map.of(
-                "", 0,
-                "multiple", 1,
-                "boolean", 2
-        );
 
         questionTypeBox = new JComboBox<>(types);
         questionTypeBox.setSelectedIndex(numAndType.get(qc.getQuestionType().getApiValue()));
@@ -251,12 +261,6 @@ public final class ConfigureQuizView {
                 "URL Safe",
                 "Base64"
         };
-
-        Map<String, Integer> numAndEncoding = Map.of(
-                "default", 0,
-                "url3986", 1,
-                "base64", 2
-        );
 
         encodingBox = new JComboBox<>(encodings);
         encodingBox.setSelectedIndex(numAndEncoding.get(qc.getEncoding().getApiValue()));

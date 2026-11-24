@@ -1,11 +1,7 @@
 package view;
 
-import interface_adapter.quiz.ConfigureQuizController;
-import interface_adapter.quiz.ConfigureQuizViewModel;
 import interface_adapter.quiz.QuizController;
 import interface_adapter.quiz.QuizViewModel;
-import interface_adapter.stats.StatsController;
-import interface_adapter.stats.StatsViewModel;
 import use_case.quiz.QuizConfigFileDataAccessInterface;
 
 import javax.swing.*;
@@ -18,13 +14,11 @@ import java.awt.event.ComponentEvent;
 public class HomeView {
 
     JFrame frame;
-    StatsController stc;
-    StatsViewModel stvm;
-    ConfigureQuizController cfc;
-    ConfigureQuizViewModel cfvm;
-    QuizController qc;
-    QuizViewModel qvm;
+    QuizController quizController;
+    QuizViewModel quizViewModel;
     QuizConfigFileDataAccessInterface qcfdai;
+    StatsView statsView;
+    ConfigureQuizView configureQuizView;
 
     private static void customizeButton(JButton button, Dimension dimensions, Font font) {
         button.setPreferredSize(dimensions);
@@ -39,12 +33,10 @@ public class HomeView {
 //            ConfigureQuizViewModel configureViewModel,
 //            QuizController quizController,
 //            QuizViewModel quizViewModel
-            StatsController stc,
-            StatsViewModel stvm,
-            ConfigureQuizController cfc,
-            ConfigureQuizViewModel cfvm,
-            QuizController qc,
-            QuizViewModel qvm,
+            StatsView statsView,
+            ConfigureQuizView configureQuizView,
+            QuizController quizController,
+            QuizViewModel quizViewModel,
             QuizConfigFileDataAccessInterface qcfdai
 
     ) {
@@ -60,13 +52,11 @@ public class HomeView {
             frame.setSize(550, 500);
             frame.setMinimumSize(new Dimension(450, 450));
             frame.setLocationRelativeTo(null);
-            this.stc = stc;
-            this.stvm = stvm;
-            this.cfc = cfc;
-            this.cfvm = cfvm;
-            this.qc = qc;
-            this.qvm = qvm;
+            this.quizController = quizController;
+            this.quizViewModel = quizViewModel;
             this.qcfdai = qcfdai;
+            this.statsView = statsView;
+            this.configureQuizView = configureQuizView;
 
             buildView();
 
@@ -114,8 +104,8 @@ public class HomeView {
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new QuizView(qc, qvm);
-                qc.newQuiz(qcfdai.loadConfig());
+                new QuizView(quizController, quizViewModel);
+                quizController.newQuiz(qcfdai.loadConfig());
 
             }
         });
@@ -125,7 +115,7 @@ public class HomeView {
         configButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ConfigureQuizView(cfc, cfvm, qc, qvm, qcfdai);
+                configureQuizView.loadView();
             }
         });
 
@@ -134,7 +124,7 @@ public class HomeView {
         statsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new StatsView(stc, stvm);
+                statsView.loadView();
             }
         });
 

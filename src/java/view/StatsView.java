@@ -22,11 +22,14 @@ public final class StatsView {
     private final JLabel summaryLabel = new JLabel(" ");
     private final DefaultListModel<String> topScores = new DefaultListModel<>();
     private final DefaultListModel<String> categoryAverages = new DefaultListModel<>();
+    final JFrame frame = new JFrame("Stats");
+    private final StatsController controller;
 
     public StatsView(StatsController controller, StatsViewModel viewModel) {
         Objects.requireNonNull(controller);
         Objects.requireNonNull(viewModel);
         viewModel.addPropertyChangeListener(event -> render((StatsViewState) event.getNewValue()));
+        this.controller = controller;
 
         SwingUtilities.invokeLater(() -> {
             JPanel panel = new JPanel();
@@ -46,13 +49,18 @@ public final class StatsView {
             addLeft(panel, new JScrollPane(new JList<>(categoryAverages)));
             addLeft(panel, refreshButton);
 
-            JFrame frame = new JFrame("Stats");
+
             frame.add(panel);
             frame.setSize(400, 450);
-            frame.setVisible(true);
+//            frame.setVisible(true);
             frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             controller.viewStats();
         });
+    }
+
+    public void loadView() {
+        controller.viewStats();
+        frame.setVisible(true);
     }
 
     private void render(StatsViewState state) {

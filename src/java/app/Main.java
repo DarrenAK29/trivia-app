@@ -69,8 +69,9 @@ public final class Main {
                         )
                 );
 
-//        new StatsView(statsController, statsViewModel);
+        StatsView statsView = new StatsView(statsController, statsViewModel);
+        ConfigureQuizView configureQuizView = new ConfigureQuizView(configureController, configureViewModel, quizController, quizViewModel, quizSettings);
 
-        new HomeView(statsController, statsViewModel, configureController, configureViewModel, quizController, quizViewModel, quizSettings);
+        new HomeView(statsView, configureQuizView, quizController, quizViewModel, quizSettings);
     }
 }
